@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Secure Payment Form</h2>
+        <form id="paymentForm" action="/process-payment" method="POST">
+            <label for="name">Name on Card:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" id="cardNumber" name="cardNumber" minlength="16" maxlength="16" required>
+
+            <label for="expiryDate">Expiry Date (MM/YY):</label>
+            <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" required>
+
+            <label for="cvv">CVV:</label>
+            <input type="password" id="cvv" name="cvv" minlength="3" maxlength="3" required>
+
+            <button type="submit">Submit Payment</button>
+        </form>
+    </div>
+
+    <script>
+        // Basic client-side validation
+        document.getElementById("paymentForm").addEventListener("submit", function (event) {
+            const cardNumber = document.getElementById("cardNumber").value;
+            if (!/^\d{16}$/.test(cardNumber)) {
+                alert("Card number must be 16 digits.");
+                event.preventDefault();
+            }
+        });
+        function luhnCheck(cardNumber) {
+    let sum = 0;
+    let shouldDouble = false;
+
+    // Process the card number from right to left
+    for (let i = cardNumber.length - 1; i >= 0; i--) {
+        let digit = parseInt(cardNumber[i]);
+
+        if (shouldDouble) {
+            digit *= 2;
+            if (digit > 9) {
+                digit -= 9;
+            }
+        }
+
+        sum += digit;
+        shouldDouble = !shouldDouble;
+    }
+
+    return sum % 10 === 0;
+}
+
+// Example usage:
+document.getElementById("paymentForm").addEventListener("submit", function (event) {
+    const cardNumber = document.getElementById("cardNumber").value;
+    if (!luhnCheck(cardNumber)) {
+        alert("Invalid card number.");
+        event.preventDefault();
+    }
+});
+function validateExpiryDate(expiryDate) {
+    const [month, year] = expiryDate.split("/").map(Number);
+    const now = new Date();
+    const expiry = new Date(`20${year}`, month - 1);
+
+    return expiry > now;
+}
+
+document.getElementById("paymentForm").addEventListener("submit", function (event) {
+    const expiryDate = document.getElementById("expiryDate").value;
+    if (!validateExpiryDate(expiryDate)) {
+        alert("Invalid expiry date.");
+        event.preventDefault();
+    }
+});
+
+    </script>
+</body>
+</html>
